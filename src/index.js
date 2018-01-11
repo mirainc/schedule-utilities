@@ -1,5 +1,7 @@
-import * as recurrenceIterator from './recurrenceIterator';
-import * as processOverrides from './processOverrides';
+import recurrenceIterator from './recurrenceIterator';
+import processOverrides from './processOverrides';
 
-export const recurrenceIterator;
-export const processOverrides;
+export default {
+  recurrenceIterator,
+  processOverrides,
+};
