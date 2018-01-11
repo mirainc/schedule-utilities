@@ -1,0 +1,19 @@
+{
+  "name": "schedule-utilities",
+  "version": "0.0.1",
+  "description": "Schedule processing utilities",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mirainc/schedule-utilities.git"
+  },
+  "author": "Mira Technologies",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mirainc/schedule-utilities/issues"
+  },
+  "homepage": "https://github.com/mirainc/schedule-utilities#readme"
+}
