@@ -1,0 +1,12 @@
+- type: serial
+  steps:
+  - type: parallel
+    service: schedule-utilities
+    steps:
+      - command: echo "Should be linting here"
+      - command: npm run test
+  - type: serial
+    tag: ^(master)
+    service: schedule-utilities
+    steps:
+      - command: bash docker/scripts/publish.bash

@@ -1,0 +1,7 @@
+# This service compiles and tests the uncompiled code
+schedule-utilities:
+  build:
+    image: schedule-utilities
+    path: .
+    dockerfile_path: /docker/Dockerfile
+  encrypted_env_file: docker/deploy.env.encrypted
