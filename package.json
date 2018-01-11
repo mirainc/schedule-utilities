@@ -1,6 +1,6 @@
 {
   "name": "schedule-utilities",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Schedule processing utilities",
   "main": "./dist/schedule-utilities.js",
   "scripts": {
