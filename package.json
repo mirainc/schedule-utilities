@@ -23,7 +23,11 @@
   },
   "babel": {
     "presets": [
-      "env"
+      "env",
+      "stage-1"
+    ],
+    "plugins": [
+      "transform-runtime"
     ]
   },
   "homepage": "https://github.com/mirainc/schedule-utilities#readme",
@@ -37,6 +41,7 @@
     "webpack": "^3.10.0"
   },
   "dependencies": {
+    "babel-runtime": "^6.26.0",
     "moment": "^2.20.1",
     "moment-timezone": "^0.5.14",
     "rrule-alt": "^2.2.7"
