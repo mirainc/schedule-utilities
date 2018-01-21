@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "outFile": "./dist/schedule-utilities.js", // path to concatenated output file
+    "sourceMap": true, // allow sourcemap support
+    "strictNullChecks": true, // enable strict null checks as a best practice
+    "module": "UMD", // specifiy module code generation
+    "target": "es5", // specify ECMAScript target version
+    "allowJs": true // allow a partial TypeScript and JavaScript codebase
+  },
+  "awesomeTypescriptLoaderOptions": {
+    "useBabel": true, // specify to persist utility of .babelrc
+    "useCache": true // Improves warm-up time with Babel
+  },
+  "include": ["./src/"]
+}

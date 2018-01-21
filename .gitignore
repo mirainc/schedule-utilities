@@ -37,6 +37,9 @@ jspm_packages
 # Optional npm cache directory
 .npm
 
+# Webpack Cache
+awcache
+
 # Bundle maps
 *.js.map
 
