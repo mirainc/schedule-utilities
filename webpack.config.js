@@ -7,20 +7,22 @@ module.exports = options => ({
     filename: 'schedule-utilities.js',
     libraryTarget: 'umd',
   },
+  resolve: {
+    extensions: ['.ts', '.js'],
+  },
   module: {
     rules: [
       {
-        test: /.js$/,
+        test: /\.(t|j)s$/,
         exclude: /node_modules/,
         use: [
           {
-            loader: 'babel-loader',
-            options: {
-              cacheDirectory: true,
-            },
+            loader: 'awesome-typescript-loader',
           },
         ],
       },
+      { enforce: 'pre', test: /\.js$/, loader: 'source-map-loader' },
     ],
   },
+  devtool: 'source-map',
 });
