@@ -46,7 +46,7 @@ jspm_packages
 .tern-port
 
 # docker
-docker/mirainc-mira-kit.aes
+*.aes
 docker/deploy.env
 
 # vscode config

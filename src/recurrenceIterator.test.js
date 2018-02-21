@@ -1,10 +1,12 @@
 /* eslint-disable no-mixed-operators */
 import moment from 'moment';
 import 'moment-timezone';
+import { RRule } from 'rrule-alt';
 import recurrenceIterator, {
   compareStart,
   stringToRRuleDate,
   realDateToRRuleDate,
+  currentOrNextRRuleStart,
 } from './recurrenceIterator';
 
 describe('compareStart', () => {
@@ -53,6 +55,42 @@ describe('stringToRRuleDate', () => {
     expect(moment(date).format('YYYY-MM-DD HH:mm:ss')).toBe(
       '2017-01-02 08:07:06',
     );
+  });
+});
+
+describe('currentOrNextRRuleStart', () => {
+  const rrule = new RRule({
+    freq: RRule['WEEKLY'],
+    byweekday: [RRule.SU, RRule.TU],
+    dtstart: new Date('2017-01-01T08:00Z'),
+  });
+  it('should return the previous recurrence on overlap', () => {
+    const date = new Date('2017-01-03T08:07:06Z');
+    const next = currentOrNextRRuleStart({
+      start: date,
+      rrule,
+      duration: 10 * 60 * 1000, // 10 minutes
+    });
+    expect(next.toISOString()).toBe('2017-01-03T08:00:00.000Z');
+  });
+  it('should return the next recurrence when there is no overlap', () => {
+    const date = new Date('2017-01-03T08:07:06Z');
+    const next = currentOrNextRRuleStart({
+      start: date,
+      rrule,
+      duration: 5 * 60 * 1000, // 5 minutes
+    });
+    expect(next.toISOString()).toBe('2017-01-08T08:00:00.000Z');
+  });
+  it('should return the current recurrence on equal dates', () => {
+    return;
+    const date = new Date('2017-01-03T08:00:00Z');
+    const next = currentOrNextRRuleStart({
+      start: date,
+      rrule,
+      duration: 10 * 60 * 1000,
+    });
+    expect(next.toISOString()).toBe('2017-01-03T08:00:00.000Z');
   });
 });
 
@@ -346,6 +384,49 @@ describe('recurrenceIterator', () => {
     next = ri.next();
     expect(next.value.start.toISOString()).toBe('2017-01-02T19:00:00.000Z');
   });
+  it('should return past recurrences if they are still "open"', () => {
+    const seq1 = {
+      start_datetime: '2017-01-01T00:00:00',
+      end_datetime: '2017-01-07T00:00:00',
+      updated_at: '2017-01-01T00:00:00',
+      tzid: 'UTC',
+      recurrence_rule: {
+        freq: 'monthly',
+        dtstart: '2017-01-01T00:00:00',
+        interval: 1,
+        bymonthday: [1],
+      },
+    };
+    const seq2 = {
+      start_datetime: '2017-01-07T00:00:00',
+      end_datetime: '2025-01-14T00:00:00',
+      updated_at: '2017-01-01T00:00:01',
+      tzid: 'UTC',
+      recurrence_rule: {
+        freq: 'monthly',
+        dtstart: '2017-01-07T00:00:00',
+        interval: 1,
+        bymonthday: [7],
+      },
+    };
+    let ri = recurrenceIterator([seq1, seq2], new Date('2017-01-02T00:00Z'));
+    let next = ri.next();
+    // Expect the Jan. 1 recurrence to get returned, even though it's Jan. 2
+    expect(next.value.start.toISOString()).toBe('2017-01-01T00:00:00.000Z');
+    next = ri.next();
+    // Let's just make sure the rest of the sequence matches expectations
+    expect(next.value.start.toISOString()).toBe('2017-01-07T00:00:00.000Z');
+    next = ri.next();
+    expect(next.value.start.toISOString()).toBe('2017-02-01T00:00:00.000Z');
+    next = ri.next();
+    expect(next.value.start.toISOString()).toBe('2017-02-07T00:00:00.000Z');
+
+    // Make sure the recurrence start date is respected; even though the
+    // recurrence makes sense in 2016, it shouldn't start until 2017.
+    ri = recurrenceIterator([seq1, seq2], new Date('2016-01-02T00:00Z'));
+    next = ri.next();
+    expect(next.value.start.toISOString()).toBe('2017-01-01T00:00:00.000Z');
+  });
 });
 
 describe('realDateToRRuleDate', () => {
@@ -356,10 +437,12 @@ describe('realDateToRRuleDate', () => {
   });
   it('should translate the local time into the timezone Pacific/Pago_Pago', () => {
     const date = new Date();
-    const offsetHere = moment.tz.zone(moment.tz.guess()).offset(date.getTime());
+    const offsetHere = moment.tz
+      .zone(moment.tz.guess())
+      .utcOffset(date.getTime());
     const offsetPPP = moment.tz
       .zone('Pacific/Pago_Pago')
-      .offset(date.getTime());
+      .utcOffset(date.getTime());
     const rruleDate = realDateToRRuleDate(date, 'Pacific/Pago_Pago');
     expect(date.getTime() + offsetHere * 60 * 1000).toBe(
       rruleDate.getTime() + offsetPPP * 60 * 1000,
@@ -367,8 +450,12 @@ describe('realDateToRRuleDate', () => {
   });
   it('should translate the local time into the timezone Pacific/Tongatapu', () => {
     const date = new Date();
-    const offsetHere = moment.tz.zone(moment.tz.guess()).offset(date.getTime());
-    const offsetPT = moment.tz.zone('Pacific/Tongatapu').offset(date.getTime());
+    const offsetHere = moment.tz
+      .zone(moment.tz.guess())
+      .utcOffset(date.getTime());
+    const offsetPT = moment.tz
+      .zone('Pacific/Tongatapu')
+      .utcOffset(date.getTime());
     const rruleDate = realDateToRRuleDate(date, 'Pacific/Tongatapu');
     expect(date.getTime() + offsetHere * 60 * 1000).toBe(
       rruleDate.getTime() + offsetPT * 60 * 1000,

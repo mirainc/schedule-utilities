@@ -102,6 +102,17 @@ const getNonrecurrenceIterator = (sequence, startDate) => {
   };
 };
 
+// Figure out the first recurrence we care about.
+// We care about a recurrence if we are currently in the time window
+// OR it's starting >= now.
+export const currentOrNextRRuleStart = ({ rrule, start, duration }) => {
+  const rrulePrev = rrule.before(start, true);
+  if (!rrulePrev || rrulePrev.getTime() + duration < start.getTime()) {
+    return rrule.after(start);
+  }
+  return rrulePrev;
+};
+
 export default function* getRecurrenceIterator(sequences, startDate) {
   if (!sequences || !sequences.length) {
     return;
@@ -145,19 +156,24 @@ export default function* getRecurrenceIterator(sequences, startDate) {
         // Remove it from our list
         return null;
       }
-      // We start at the start_datetime (if it hasn't already passed) OR the
-      // first recurrence after the startDate (inclusive).
+      const duration = sequence.end_datetime
+        ? stringToRRuleDate(sequence.end_datetime) -
+          stringToRRuleDate(sequence.start_datetime)
+        : 0;
+      // If the initial start/end pair is valid, use that.
+      // Otherwise, calculate the current/next recurrence.
       const rruleStart = nri
         ? nri.rruleStart
-        : rrule.after(realDateToRRuleDate(startDate, tzid), true);
+        : currentOrNextRRuleStart({
+            start: realDateToRRuleDate(startDate, tzid),
+            duration,
+            rrule,
+          });
       const start = nri ? nri.start : rRuleDateToRealDate(rruleStart, tzid);
       return {
         rruleStart,
         start,
-        duration: sequence.end_datetime
-          ? stringToRRuleDate(sequence.end_datetime) -
-            stringToRRuleDate(sequence.start_datetime)
-          : 0,
+        duration,
         updatedAt: sequence.updated_at,
         tzid,
         sequence,
