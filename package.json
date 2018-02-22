@@ -1,6 +1,6 @@
 {
   "name": "schedule-utilities",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Schedule processing utilities",
   "main": "./dist/schedule-utilities.js",
   "scripts": {
@@ -22,13 +22,8 @@
     "singleQuote": true
   },
   "babel": {
-    "presets": [
-      "env",
-      "stage-1"
-    ],
-    "plugins": [
-      "transform-runtime"
-    ]
+    "presets": ["env", "stage-1"],
+    "plugins": ["transform-runtime"]
   },
   "homepage": "https://github.com/mirainc/schedule-utilities#readme",
   "devDependencies": {
