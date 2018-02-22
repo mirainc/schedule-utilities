@@ -399,7 +399,7 @@ describe('recurrenceIterator', () => {
     };
     const seq2 = {
       start_datetime: '2017-01-07T00:00:00',
-      end_datetime: '2025-01-14T00:00:00',
+      end_datetime: '2017-01-14T00:00:00',
       updated_at: '2017-01-01T00:00:01',
       tzid: 'UTC',
       recurrence_rule: {
@@ -426,6 +426,12 @@ describe('recurrenceIterator', () => {
     ri = recurrenceIterator([seq1, seq2], new Date('2016-01-02T00:00Z'));
     next = ri.next();
     expect(next.value.start.toISOString()).toBe('2017-01-01T00:00:00.000Z');
+
+    // Make sure if we ask for the next recurrence when now === the previous
+    // recurrence's end time, we return the next recurrence.
+    ri = recurrenceIterator([seq1, seq2], new Date('2017-01-07T00:00Z'));
+    next = ri.next();
+    expect(next.value.start.toISOString()).toBe('2017-01-07T00:00:00.000Z');
   });
 });
 

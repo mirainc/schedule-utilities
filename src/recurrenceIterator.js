@@ -107,7 +107,7 @@ const getNonrecurrenceIterator = (sequence, startDate) => {
 // OR it's starting >= now.
 export const currentOrNextRRuleStart = ({ rrule, start, duration }) => {
   const rrulePrev = rrule.before(start, true);
-  if (!rrulePrev || rrulePrev.getTime() + duration < start.getTime()) {
+  if (!rrulePrev || rrulePrev.getTime() + duration <= start.getTime()) {
     return rrule.after(start);
   }
   return rrulePrev;
