@@ -25,6 +25,7 @@ coverage
 
 # Compiled binary addons (http://nodejs.org/api/addons.html)
 dist/
+lib/
 build/Release
 bundle.js
 container.js
