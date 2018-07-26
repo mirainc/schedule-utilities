@@ -6,7 +6,9 @@
   "scripts": {
     "build": "babel src --out-dir lib && webpack",
     "prepare": "npm run build",
-    "test": "jest"
+    "test": "jest",
+    "encryptenv": "jet encrypt docker/deploy.env docker/deploy.env.encrypted --key-path=mirainc_schedule-utilities.aes",
+    "decryptenv": "jet decrypt docker/deploy.env.encrypted docker/deploy.env --key-path=mirainc_schedule-utilities.aes"
   },
   "repository": {
     "type": "git",
@@ -22,8 +24,13 @@
     "singleQuote": true
   },
   "babel": {
-    "presets": ["env", "stage-1"],
-    "plugins": ["transform-runtime"]
+    "presets": [
+      "env",
+      "stage-1"
+    ],
+    "plugins": [
+      "transform-runtime"
+    ]
   },
   "homepage": "https://github.com/mirainc/schedule-utilities#readme",
   "devDependencies": {
