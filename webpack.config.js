@@ -1,7 +1,7 @@
 var path = require('path');
 
 module.exports = options => ({
-  entry: './src/index.js',
+  entry: './lib/index.js',
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: 'schedule-utilities.js',

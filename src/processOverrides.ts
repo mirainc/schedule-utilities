@@ -1,10 +1,12 @@
+import Occurrence from './types/Occurrence';
+
 // Some functions that mutate occurrences.
 // We clone the inbound occurrence list, so we shouldn't have any
 // unintended side effects by doing so.
 
 /* eslint-disable no-param-reassign */
 
-const addOverride = (sequence, overridden) => {
+const addOverride = (sequence: Occurrence, overridden: Occurrence) => {
   let overrides = sequence.overrides || [];
   overrides.push(overridden);
   if (overridden.overrides) {
@@ -13,7 +15,10 @@ const addOverride = (sequence, overridden) => {
   sequence.overrides = overrides;
 };
 
-const trimOccurrenceStartOrEnd = startOrEnd => (occurrence, time) => {
+const trimOccurrenceStartOrEnd = (startOrEnd: 'start' | 'end') => (
+  occurrence: Occurrence,
+  time: Date,
+) => {
   occurrence[startOrEnd] = time;
   if (occurrence.overrides) {
     // Trim all overrides as well
@@ -29,17 +34,18 @@ const trimOccurrenceStartOrEnd = startOrEnd => (occurrence, time) => {
 const trimOccurrenceStart = trimOccurrenceStartOrEnd('start');
 const trimOccurrenceEnd = trimOccurrenceStartOrEnd('end');
 
-const spliceOccurrenceByStart = (occurrences, occurrence) => {
+const spliceOccurrenceByStart = (
+  occurrences: Occurrence[],
+  occurrence: Occurrence,
+) => {
   // Find the first item with a start time greater than the current
   let idx = occurrences.findIndex(o => o.start > occurrence.start);
   // If we can't find such a thing, append to the end
-  if (idx < 0) {
-    idx = occurrences.length;
-  }
+  if (idx < 0) idx = occurrences.length;
   occurrences.splice(idx, 0, occurrence);
 };
 
-const cloneOccurrence = occurrence => ({
+const cloneOccurrence: (occurrence: Occurrence) => Occurrence = occurrence => ({
   ...occurrence,
   overrides: occurrence.overrides
     ? occurrence.overrides.map(o => cloneOccurrence(o))
@@ -48,7 +54,7 @@ const cloneOccurrence = occurrence => ({
 
 /* eslint-enable no-param-reassign */
 
-export default inOccurrences => {
+export default (inOccurrences: Occurrence[]) => {
   // Clone the input as a shallow copy. We only manipulate the top-level props
   // (start, end, overrides) so this is sufficient.
   const occurrences = inOccurrences.map(o => ({ ...o }));

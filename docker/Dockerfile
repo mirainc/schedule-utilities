@@ -10,5 +10,7 @@ ADD . /usr/src/schedule-utilities
 
 RUN npm install
 
+RUN npm run build
+
 #Exposing default port
 EXPOSE 3000

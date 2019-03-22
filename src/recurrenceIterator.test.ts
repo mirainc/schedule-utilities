@@ -1,6 +1,5 @@
 /* eslint-disable no-mixed-operators */
-import moment from 'moment';
-import 'moment-timezone';
+import * as moment from 'moment-timezone/builds/moment-timezone-with-data-2012-2022';
 import { RRule } from 'rrule-alt';
 import recurrenceIterator, {
   compareStart,
@@ -8,6 +7,7 @@ import recurrenceIterator, {
   realDateToRRuleDate,
   currentOrNextRRuleStart,
 } from './recurrenceIterator';
+import { Frequency, WeekDay } from './types';
 
 describe('compareStart', () => {
   it('should compare start datetimes', () => {
@@ -60,7 +60,7 @@ describe('stringToRRuleDate', () => {
 
 describe('currentOrNextRRuleStart', () => {
   const rrule = new RRule({
-    freq: RRule['WEEKLY'],
+    freq: RRule.WEEKLY,
     byweekday: [RRule.SU, RRule.TU],
     dtstart: new Date('2017-01-01T08:00Z'),
   });
@@ -83,7 +83,6 @@ describe('currentOrNextRRuleStart', () => {
     expect(next.toISOString()).toBe('2017-01-08T08:00:00.000Z');
   });
   it('should return the current recurrence on equal dates', () => {
-    return;
     const date = new Date('2017-01-03T08:00:00Z');
     const next = currentOrNextRRuleStart({
       start: date,
@@ -156,8 +155,8 @@ describe('recurrenceIterator', () => {
       start_datetime: '2017-01-01T08:00',
       end_datetime: '2017-01-01T09:00',
       recurrence_rule: {
-        freq: 'weekly',
-        byday: ['SU', 'TU'],
+        freq: Frequency.WEEKLY,
+        byday: [WeekDay.SU, WeekDay.TU],
         dtstart: '2017-01-01T08:00',
       },
       tzid: 'UTC',
@@ -178,8 +177,8 @@ describe('recurrenceIterator', () => {
       start_datetime: '2017-01-01T08:00',
       end_datetime: '2017-01-01T09:00',
       recurrence_rule: {
-        freq: 'weekly',
-        byday: ['SU', 'TU'],
+        freq: Frequency.WEEKLY,
+        byday: [WeekDay.SU, WeekDay.TU],
         // Use St. Johns since the half-hour offset makes it useful for tests
         dtstart: '2017-01-01T08:00',
       },
@@ -207,8 +206,8 @@ describe('recurrenceIterator', () => {
       start_datetime: '2017-01-02T08:00',
       end_datetime: '2017-01-02T09:00',
       recurrence_rule: {
-        freq: 'weekly',
-        byday: ['MO'],
+        freq: Frequency.WEEKLY,
+        byday: [WeekDay.MO],
         dtstart: '2017-01-02T08:00',
       },
       tzid: 'Pacific/Easter',
@@ -222,13 +221,19 @@ describe('recurrenceIterator', () => {
   it('should return multiple values for multiple recurring rules', () => {
     const seq1 = {
       start_datetime: '2017-01-01T01:00Z',
-      recurrence_rule: { freq: 'weekly', byday: ['SU', 'TU', 'TH'] },
+      recurrence_rule: {
+        freq: Frequency.WEEKLY,
+        byday: [WeekDay.SU, WeekDay.TU, WeekDay.TH],
+      },
     };
     const seq2 = {
       start_datetime: '2017-01-01T02:00Z',
-      recurrence_rule: { freq: 'weekly', byday: ['SA', 'SU'] },
+      recurrence_rule: {
+        freq: Frequency.WEEKLY,
+        byday: [WeekDay.SA, WeekDay.SU],
+      },
     };
-    const ri = recurrenceIterator([seq1, seq2], '2017-01-01T00:00Z');
+    const ri = recurrenceIterator([seq1, seq2], new Date('2017-01-01T00:00Z'));
     let next = ri.next();
     expect(next.value.start.toISOString()).toBe('2017-01-01T01:00:00.000Z');
     expect(next.value.sequence).toBe(seq1);
@@ -249,18 +254,27 @@ describe('recurrenceIterator', () => {
     const seq1 = {
       start_datetime: '2017-01-01T01:00Z',
       updated_at: '2017-01-01T00:00Z',
-      recurrence_rule: { freq: 'weekly', byday: ['SU', 'TU', 'TH'] },
+      recurrence_rule: {
+        freq: Frequency.WEEKLY,
+        byday: [WeekDay.SU, WeekDay.TU, WeekDay.TH],
+      },
     };
     const seq2 = {
       start_datetime: '2017-01-01T01:00Z',
       updated_at: '2017-01-01T00:01Z',
-      recurrence_rule: { freq: 'weekly', byday: ['TH', 'SU'] },
+      recurrence_rule: {
+        freq: Frequency.WEEKLY,
+        byday: [WeekDay.TH, WeekDay.SU],
+      },
     };
     const seq3 = {
       start_datetime: '2017-01-01T01:00Z',
       updated_at: '2017-01-01T00:02Z',
     };
-    const ri = recurrenceIterator([seq1, seq2, seq3], '2017-01-01T00:00Z');
+    const ri = recurrenceIterator(
+      [seq1, seq2, seq3],
+      new Date('2017-01-01T00:00Z'),
+    );
     let next = ri.next();
     expect(next.value.start.toISOString()).toBe('2017-01-01T01:00:00.000Z');
     expect(next.value.sequence).toBe(seq3);
@@ -292,22 +306,25 @@ describe('recurrenceIterator', () => {
     const seq3 = {
       start_datetime: '2017-01-01T23:00Z',
       end_datetime: '2017-01-02T23:00Z',
-      recurrence_rule: { freq: 'weekly', byday: ['TH', 'SU'] },
+      recurrence_rule: {
+        freq: Frequency.WEEKLY,
+        byday: [WeekDay.TH, WeekDay.SU],
+      },
     };
-    let ri = recurrenceIterator([seq1], '2017-01-01T00:00Z');
+    let ri = recurrenceIterator([seq1], new Date('2017-01-01T00:00Z'));
     let next = ri.next();
     // 30 minutes
-    expect(next.value.end - next.value.start).toBe(30 * 60 * 1000);
+    expect(+next.value.end - +next.value.start).toBe(30 * 60 * 1000);
 
-    ri = recurrenceIterator([seq2], '2017-01-01T00:00Z');
+    ri = recurrenceIterator([seq2], new Date('2017-01-01T00:00Z'));
     next = ri.next();
     // 1 hour
-    expect(next.value.end - next.value.start).toBe(60 * 60 * 1000);
+    expect(+next.value.end - +next.value.start).toBe(60 * 60 * 1000);
 
-    ri = recurrenceIterator([seq3], '2017-01-01T00:00Z');
+    ri = recurrenceIterator([seq3], new Date('2017-01-01T00:00Z'));
     next = ri.next();
     // 24 hours
-    expect(next.value.end - next.value.start).toBe(24 * 60 * 60 * 1000);
+    expect(+next.value.end - +next.value.start).toBe(24 * 60 * 60 * 1000);
   });
   it('should handle sequences with different timezones', () => {
     const seq1 = {
@@ -335,7 +352,7 @@ describe('recurrenceIterator', () => {
       start_datetime: '2017-01-01T01:00Z', // Sunday
       end_datetime: '2017-01-01T02:00',
       updated_at: '2017-01-01T00:00Z',
-      recurrence_rule: { freq: 'weekly', byday: ['MO'] },
+      recurrence_rule: { freq: Frequency.WEEKLY, byday: [WeekDay.MO] },
     };
     const ri = recurrenceIterator([seq], new Date('2017-01-01T00:00Z'));
     let next = ri.next();
@@ -355,10 +372,18 @@ describe('recurrenceIterator', () => {
       updated_at: '2017-01-01T00:00:00',
       tzid: 'America/New_York',
       recurrence_rule: {
-        freq: 'weekly',
+        freq: Frequency.WEEKLY,
         dtstart: '2017-01-01T14:00:00',
         interval: 1,
-        byday: ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA'],
+        byday: [
+          WeekDay.SU,
+          WeekDay.MO,
+          WeekDay.TU,
+          WeekDay.WE,
+          WeekDay.TH,
+          WeekDay.FR,
+          WeekDay.SA,
+        ],
       },
     };
     const seq2 = {
@@ -368,10 +393,18 @@ describe('recurrenceIterator', () => {
       updated_at: '2017-01-01T00:00:01',
       tzid: 'America/New_York',
       recurrence_rule: {
-        freq: 'weekly',
+        freq: Frequency.WEEKLY,
         dtstart: '2017-01-01T00:00:00',
         interval: 1,
-        byday: ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA'],
+        byday: [
+          WeekDay.SU,
+          WeekDay.MO,
+          WeekDay.TU,
+          WeekDay.WE,
+          WeekDay.TH,
+          WeekDay.FR,
+          WeekDay.SA,
+        ],
       },
     };
     const ri = recurrenceIterator([seq1, seq2], new Date('2017-01-01T00:00Z'));
@@ -391,7 +424,7 @@ describe('recurrenceIterator', () => {
       updated_at: '2017-01-01T00:00:00',
       tzid: 'UTC',
       recurrence_rule: {
-        freq: 'monthly',
+        freq: Frequency.MONTHLY,
         dtstart: '2017-01-01T00:00:00',
         interval: 1,
         bymonthday: [1],
@@ -403,7 +436,7 @@ describe('recurrenceIterator', () => {
       updated_at: '2017-01-01T00:00:01',
       tzid: 'UTC',
       recurrence_rule: {
-        freq: 'monthly',
+        freq: Frequency.MONTHLY,
         dtstart: '2017-01-07T00:00:00',
         interval: 1,
         bymonthday: [7],
