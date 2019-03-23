@@ -51,5 +51,8 @@
     "moment": "^2.20.1",
     "moment-timezone": "^0.5.14",
     "rrule-alt": "^2.2.7"
+  },
+  "jest": {
+    "testEnvironment": "node"
   }
 }
