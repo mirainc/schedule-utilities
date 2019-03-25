@@ -4,7 +4,7 @@
   "description": "Schedule processing utilities",
   "main": "./lib/index.js",
   "scripts": {
-    "build": "tsc && webpack",
+    "build": "tsc",
     "prepare": "npm run build",
     "test": "jest",
     "encryptenv": "jet encrypt docker/deploy.env docker/deploy.env.encrypted --key-path=mirainc_schedule-utilities.aes",
@@ -23,29 +23,13 @@
     "trailingComma": "all",
     "singleQuote": true
   },
-  "babel": {
-    "presets": [
-      "env",
-      "stage-1"
-    ],
-    "plugins": [
-      "transform-runtime"
-    ]
-  },
   "homepage": "https://github.com/mirainc/schedule-utilities#readme",
   "devDependencies": {
     "@types/jest": "^22.2.3",
     "@types/moment-timezone": "^0.5.12",
-    "babel-core": "^6.26.0",
-    "babel-loader": "^7.1.2",
-    "babel-plugin-transform-runtime": "^6.23.0",
-    "babel-preset-env": "^1.6.1",
-    "babel-preset-stage-1": "^6.24.1",
-    "babel-runtime": "^6.26.0",
     "jest": "^22.0.6",
     "rrule": "^2.6.0",
-    "typescript": "^3.3.4000",
-    "webpack": "^3.10.0"
+    "typescript": "^3.3.4000"
   },
   "dependencies": {
     "moment": "^2.20.1",
