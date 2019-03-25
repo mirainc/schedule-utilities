@@ -2,17 +2,14 @@
 
 Schedule processing utilities
 
-## Usage
+## Install
 
-```
+```bash
 yarn add schedule-utilities
 ```
 
+## Usage
+
 ```js
 import { recurrenceIterator, processOverrides } from 'schedule-utilities';
-// Or use the bundled version of schedule-utilities.
-import {
-  recurrenceIterator,
-  processOverrides,
-} from 'schedule-utilities/dist/schedule-utilities';
 ```

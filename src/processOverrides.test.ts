@@ -1,5 +1,6 @@
 import processOverrides from './processOverrides';
 import recurrenceIterator from './recurrenceIterator';
+import { Frequency, Sequence, WeekDay } from './types';
 
 describe('processOverrides', () => {
   it('returns an empty list for an empty list', () => {
@@ -11,14 +12,20 @@ describe('processOverrides', () => {
       {
         start: new Date('2017-01-01T01:00'),
         end: new Date('2017-01-01T01:30'),
+        updatedAt: new Date('2017-01-01T00:30'),
+        id: '1',
       },
       {
         start: new Date('2017-01-01T01:30'),
         end: new Date('2017-01-01T02:00'),
+        updatedAt: new Date('2017-01-01T00:30'),
+        id: '2',
       },
       {
         start: new Date('2017-01-02T01:00'),
         end: new Date('2017-01-02T02:00'),
+        updatedAt: new Date('2017-01-02T00:30'),
+        id: '3',
       },
     ];
     expect(processOverrides(noConflicts)).toEqual(noConflicts);
@@ -313,7 +320,7 @@ describe('processOverrides', () => {
   });
 
   it('handles super-long recurrences that conflict with themselves and others', () => {
-    const sequences = [
+    const sequences: Sequence[] = [
       {
         created_at: '2017-11-15T19:52:10.051756Z',
         description: '',
@@ -324,9 +331,17 @@ describe('processOverrides', () => {
         name: 'Wut',
         presentations: ['caa9a84d-f05c-4500-ae75-759b8092cebd'],
         recurrence_rule: {
-          byday: ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA'],
+          byday: [
+            WeekDay.SU,
+            WeekDay.MO,
+            WeekDay.TU,
+            WeekDay.WE,
+            WeekDay.TH,
+            WeekDay.FR,
+            WeekDay.SA,
+          ],
           dtstart: '2017-11-15T12:00:00',
-          freq: 'weekly',
+          freq: Frequency.WEEKLY,
           interval: 1,
           tzid: 'America/Los_Angeles',
         },
@@ -344,9 +359,17 @@ describe('processOverrides', () => {
         name: 'Wut2',
         presentations: ['ba333db1-055d-44f4-a36e-761535b89c2a'],
         recurrence_rule: {
-          byday: ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA'],
+          byday: [
+            WeekDay.SU,
+            WeekDay.MO,
+            WeekDay.TU,
+            WeekDay.WE,
+            WeekDay.TH,
+            WeekDay.FR,
+            WeekDay.SA,
+          ],
           dtstart: '2017-11-15T23:55:00',
-          freq: 'weekly',
+          freq: Frequency.WEEKLY,
           interval: 1,
           tzid: 'America/Los_Angeles',
         },

@@ -1,8 +1,8 @@
 // Takes in a collection of sequences.
 // Returns a series of sequences in the order in which they'll run.
 import { RRule } from 'rrule-alt';
-import moment from 'moment';
-import 'moment-timezone/builds/moment-timezone-with-data-2012-2022';
+import * as moment from 'moment-timezone/builds/moment-timezone-with-data-2012-2022';
+import Sequence from './types/Sequence';
 
 const dayOfWeekMap = {
   MO: RRule.MO,
@@ -14,9 +14,19 @@ const dayOfWeekMap = {
   SU: RRule.SU,
 };
 
-const isNullOrEmptyObject = o => !o || !Object.keys(o).length;
+const frequencyMap = {
+  yearly: RRule.YEARLY,
+  monthly: RRule.MONTHLY,
+  weekly: RRule.WEEKLY,
+  daily: RRule.DAILY,
+  hourly: RRule.HOURLY,
+  minutely: RRule.MINUTELY,
+  secondly: RRule.SECONDLY,
+};
 
-export const compareDates = (a, b) => {
+const isNullOrEmptyObject = (o: void | object) => !o || !Object.keys(o).length;
+
+export const compareDates = (a: Date, b: Date) => {
   if (a && b) {
     if (a < b) {
       return -1;
@@ -35,7 +45,10 @@ export const compareDates = (a, b) => {
 // Compare start/end timestamps.
 // Falsy timestamps should appear at the end, so are treated as
 // greater than "real" timestamps.
-export const compareDateField = field => (as, bs) => {
+export const compareDateField = (field: 'start' | 'end') => (
+  as: { start?: Date; end?: Date; updatedAt?: Date } & object,
+  bs: { start?: Date; end?: Date; updatedAt?: Date } & object,
+) => {
   const result = compareDates(as[field], bs[field]);
   if (result === 0) {
     // updatedAt is the tiebreaker
@@ -53,7 +66,8 @@ export const compareEnd = compareDateField('end');
 // and translate them back to the browser timezone when done.
 // We remove trailing Zs here as the API will sometimes return datetimes
 // with the UTC marker (Z) even though these datetimes are timezoned.
-export const stringToRRuleDate = dt => moment(dt.replace(/Z/, '')).toDate();
+export const stringToRRuleDate = (dt: string) =>
+  moment(dt.replace(/Z/, '')).toDate();
 
 // Start dates are passed in as local time, and we need to move them into
 // the RRule no-timezone bubble universe. We take the local time, translate
@@ -62,7 +76,7 @@ export const stringToRRuleDate = dt => moment(dt.replace(/Z/, '')).toDate();
 // This is probably a bit hard to wrap your head around, but basically we're
 // looking for 8am PST to get translated into 11am EST, but we then sleaze
 // that into 11am PST to make the rrule logic work.
-export const realDateToRRuleDate = (date, rruleTZ) =>
+export const realDateToRRuleDate = (date: Date, rruleTZ: string) =>
   moment(
     moment(date)
       .tz(rruleTZ)
@@ -71,7 +85,7 @@ export const realDateToRRuleDate = (date, rruleTZ) =>
 
 // Translate an RRuleDate from its weird timezone-free bubble universe
 // into a real date.
-export const rRuleDateToRealDate = (date, tzid) => {
+export const rRuleDateToRealDate = (date: Date, tzid: string) => {
   if (!date) {
     return null;
   }
@@ -79,7 +93,7 @@ export const rRuleDateToRealDate = (date, tzid) => {
   return moment.tz(dt, tzid).toDate();
 };
 
-const getNonrecurrenceIterator = (sequence, startDate) => {
+const getNonrecurrenceIterator = (sequence: Sequence, startDate: Date) => {
   const tzid = sequence.tzid || 'UTC';
 
   // If we're already past this sequence, bail.
@@ -93,19 +107,27 @@ const getNonrecurrenceIterator = (sequence, startDate) => {
     rruleStart,
     start,
     duration: sequence.end_datetime
-      ? stringToRRuleDate(sequence.end_datetime) - rruleStart
+      ? +stringToRRuleDate(sequence.end_datetime) - +rruleStart
       : 0,
-    updatedAt: sequence.updated_at,
+    updatedAt: new Date(sequence.updated_at),
     tzid,
     sequence,
-    next: () => null,
+    next: () => null as null,
   };
 };
 
 // Figure out the first recurrence we care about.
 // We care about a recurrence if we are currently in the time window
 // OR it's starting >= now.
-export const currentOrNextRRuleStart = ({ rrule, start, duration }) => {
+export const currentOrNextRRuleStart = ({
+  rrule,
+  start,
+  duration,
+}: {
+  rrule: RRule;
+  start: Date;
+  duration: number;
+}) => {
   const rrulePrev = rrule.before(start, true);
   if (!rrulePrev || rrulePrev.getTime() + duration <= start.getTime()) {
     return rrule.after(start);
@@ -113,7 +135,10 @@ export const currentOrNextRRuleStart = ({ rrule, start, duration }) => {
   return rrulePrev;
 };
 
-export default function* getRecurrenceIterator(sequences, startDate) {
+export default function* getRecurrenceIterator(
+  sequences: Sequence[],
+  startDate?: Date,
+) {
   if (!sequences || !sequences.length) {
     return;
   }
@@ -142,12 +167,12 @@ export default function* getRecurrenceIterator(sequences, startDate) {
       const dtstart = stringToRRuleDate(dtstartStr);
       const rruleDefn = {
         ...recurrenceRule,
-        freq: RRule[freq.toUpperCase()],
+        freq: frequencyMap[freq],
         byweekday,
         dtstart,
       };
       // Create the RRule
-      let rrule;
+      let rrule: RRule;
       try {
         rrule = new RRule(rruleDefn);
       } catch (e) {
@@ -157,8 +182,8 @@ export default function* getRecurrenceIterator(sequences, startDate) {
         return null;
       }
       const duration = sequence.end_datetime
-        ? stringToRRuleDate(sequence.end_datetime) -
-          stringToRRuleDate(sequence.start_datetime)
+        ? +stringToRRuleDate(sequence.end_datetime) -
+          +stringToRRuleDate(sequence.start_datetime)
         : 0;
       // If the initial start/end pair is valid, use that.
       // Otherwise, calculate the current/next recurrence.
@@ -174,7 +199,7 @@ export default function* getRecurrenceIterator(sequences, startDate) {
         rruleStart,
         start,
         duration,
-        updatedAt: sequence.updated_at,
+        updatedAt: new Date(sequence.updated_at),
         tzid,
         sequence,
         next() {
@@ -196,7 +221,8 @@ export default function* getRecurrenceIterator(sequences, startDate) {
       sequence,
       start,
       end: new Date(start.getTime() + duration),
-      updatedAt: sequence.updated_at,
+      updatedAt: new Date(sequence.updated_at),
+      id: sequence.id,
     };
   }
 }

@@ -1,4 +1,4 @@
-import scheduleUtilities from './index';
+import * as scheduleUtilities from './index';
 
 describe('scheduleUtilities', () => {
   it('should have a recurrenceIterator method', () => {
