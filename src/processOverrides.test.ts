@@ -1,6 +1,6 @@
 import processOverrides from './processOverrides';
 import recurrenceIterator from './recurrenceIterator';
-import { Frequency, Sequence, WeekDay } from './types';
+import { Frequency, Sequence, WeekDay, Occurrence } from './types';
 
 describe('processOverrides', () => {
   it('returns an empty list for an empty list', () => {
@@ -27,7 +27,7 @@ describe('processOverrides', () => {
         updatedAt: new Date('2017-01-02T00:30'),
         id: '3',
       },
-    ];
+    ] as Occurrence[];
     expect(processOverrides(noConflicts)).toEqual(noConflicts);
   });
 
@@ -44,8 +44,8 @@ describe('processOverrides', () => {
       updatedAt: new Date('2017-01-01T00:00'),
       id: 'loser',
     };
-    const startConflict1 = [loser, winner];
-    const startConflict2 = [winner, loser];
+    const startConflict1 = [loser, winner] as Occurrence[];
+    const startConflict2 = [winner, loser] as Occurrence[];
 
     [startConflict1, startConflict2].forEach(startConflict => {
       const retval = processOverrides(startConflict);
@@ -78,7 +78,7 @@ describe('processOverrides', () => {
         updatedAt: new Date('2017-01-01T00:01'),
         id: 'short',
       },
-    ];
+    ] as Occurrence[];
     // This won't cause a split, as the long occurrence takes priority
     const startNoSplit = [
       {
@@ -93,7 +93,7 @@ describe('processOverrides', () => {
         updatedAt: new Date('2017-01-01T00:00'),
         id: 'short',
       },
-    ];
+    ] as Occurrence[];
 
     const split = processOverrides(startSplit);
     expect(split.length).toEqual(2);
@@ -142,7 +142,7 @@ describe('processOverrides', () => {
         updatedAt: new Date('2017-01-01T00:01'),
         id: 'short',
       },
-    ];
+    ] as Occurrence[];
     // This won't cause a split, as the long occurrence takes priority
     const endNoSplit = [
       {
@@ -157,7 +157,7 @@ describe('processOverrides', () => {
         updatedAt: new Date('2017-01-01T00:00'),
         id: 'short',
       },
-    ];
+    ] as Occurrence[];
 
     const split = processOverrides(endSplit);
     expect(split.length).toEqual(2);
@@ -208,7 +208,7 @@ describe('processOverrides', () => {
         updatedAt: new Date('2017-01-01T00:01'),
         id: 'short',
       },
-    ];
+    ] as Occurrence[];
     // This won't cause a split, as the long occurrence takes priority
     const middleNoSplit = [
       {
@@ -223,7 +223,7 @@ describe('processOverrides', () => {
         updatedAt: new Date('2017-01-01T00:00'),
         id: 'short',
       },
-    ];
+    ] as Occurrence[];
 
     const split = processOverrides(middleSplit);
     expect(split.length).toEqual(3);
@@ -290,7 +290,7 @@ describe('processOverrides', () => {
         updatedAt: new Date('2017-01-01T00:02'),
         id: 'high',
       },
-    ]);
+    ] as Occurrence[]);
 
     expect(split.length).toEqual(3);
     // The non-overridden chunk of "low" should end when the
@@ -320,7 +320,7 @@ describe('processOverrides', () => {
   });
 
   it('handles super-long recurrences that conflict with themselves and others', () => {
-    const sequences: Sequence[] = [
+    const sequences = [
       {
         created_at: '2017-11-15T19:52:10.051756Z',
         description: '',
@@ -377,7 +377,7 @@ describe('processOverrides', () => {
         tzid: 'America/Los_Angeles',
         updated_at: '2017-11-15T19:52:55.909715Z',
       },
-    ];
+    ] as Sequence[];
     const ri = recurrenceIterator(sequences, new Date('2017-01-01T00:00Z'));
     const occurrences = [];
     const NUM_OCCURRENCES = 50;

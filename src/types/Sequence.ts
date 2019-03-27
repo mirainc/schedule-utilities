@@ -1,25 +1,30 @@
 import Frequency from './Frequency';
 import WeekDay from './WeekDay';
 
-type Sequence = Partial<{
+interface RecurrenceRule {
+  byday?: WeekDay[];
+  byhour?: number;
+  byminute?: number;
+  dtstart: string;
+  freq: Frequency;
+  interval: number;
+  tzid: string;
+}
+
+export interface Sequence {
   created_at: string;
   description: string;
-  device_group_id: null | string;
-  device_id: null | string;
+  device_group_id: string | null;
+  device_id: string | null;
+  end_datetime: string;
   id: string;
   name: string;
   presentations: string[];
-  tzid: string;
-  end_datetime: string;
+  recurrence_rule: RecurrenceRule | null;
   start_datetime: string;
+  tzid: string;
   updated_at: string;
-  recurrence_rule: null | Partial<{
-    tzid: string;
-    freq: Frequency;
-    byday: WeekDay[];
-    dtstart: string;
-    interval: number;
-  }>;
-}>;
+  user_id: string;
+}
 
 export default Sequence;
