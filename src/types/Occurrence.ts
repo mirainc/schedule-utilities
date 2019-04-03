@@ -5,7 +5,7 @@ interface Occurrence {
   end: Date;
   updatedAt: Date;
   id: string;
-  sequence?: Sequence;
+  sequence: Sequence;
   overridden?: true;
   overrides?: Occurrence[];
 }

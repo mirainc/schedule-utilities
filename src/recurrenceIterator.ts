@@ -112,7 +112,7 @@ const getNonrecurrenceIterator = (sequence: Sequence, startDate: Date) => {
     updatedAt: new Date(sequence.updated_at),
     tzid,
     sequence,
-    next: () => null as null,
+    next: (): null => null,
   };
 };
 
