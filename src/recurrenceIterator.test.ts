@@ -8,6 +8,7 @@ import recurrenceIterator, {
   currentOrNextRRuleStart,
 } from './recurrenceIterator';
 import { Frequency, WeekDay, Sequence } from './types';
+import createSequence from './factories/createSequence';
 
 describe('compareStart', () => {
   it('should compare start datetimes', () => {
@@ -101,7 +102,7 @@ describe('recurrenceIterator', () => {
     expect(next.done).toBe(true);
   });
   it('should return a single value for a single non-recurring rule', () => {
-    const seq1 = { start_datetime: '2017-01-01T00:00Z' } as Sequence;
+    const seq1 = createSequence({ start_datetime: '2017-01-01T00:00Z' });
     const ri = recurrenceIterator([seq1]);
     let next = ri.next();
     expect(next.value.sequence).toBe(seq1);
@@ -112,9 +113,9 @@ describe('recurrenceIterator', () => {
     expect(next.done).toBe(true);
   });
   it('should return a sorted values for multiple non-recurring rules', () => {
-    const seq1 = { start_datetime: '2017-01-01T00:00Z' } as Sequence;
-    const seq2 = { start_datetime: '2017-01-02T00:00Z' } as Sequence;
-    const seq3 = { start_datetime: '2017-01-02T01:00Z' } as Sequence;
+    const seq1 = createSequence({ start_datetime: '2017-01-01T00:00Z' });
+    const seq2 = createSequence({ start_datetime: '2017-01-02T00:00Z' });
+    const seq3 = createSequence({ start_datetime: '2017-01-02T01:00Z' });
     const ri = recurrenceIterator([seq1, seq3, seq2]);
     let next = ri.next();
     expect(next.value.sequence).toBe(seq1);
@@ -130,18 +131,18 @@ describe('recurrenceIterator', () => {
     expect(next.done).toBe(true);
   });
   it('should return an empty list if the start is after the sequences complete', () => {
-    const seq1 = {
+    const seq1 = createSequence({
       start_datetime: '2017-01-01T00:00Z',
       end_datetime: '2017-01-01T01:00Z',
-    } as Sequence;
-    const seq2 = {
+    });
+    const seq2 = createSequence({
       start_datetime: '2017-01-02T00:00Z',
       end_datetime: '2017-01-01T01:00Z',
-    } as Sequence;
-    const seq3 = {
+    });
+    const seq3 = createSequence({
       start_datetime: '2017-01-02T01:00Z',
       end_datetime: '2017-01-01T01:00Z',
-    } as Sequence;
+    });
     const ri = recurrenceIterator(
       [seq1, seq3, seq2],
       new Date('2017-01-03T00:00Z'),
@@ -151,7 +152,7 @@ describe('recurrenceIterator', () => {
     expect(next.done).toBe(true);
   });
   it('should return multiple values for a recurring rule (UTC)', () => {
-    const seq = {
+    const seq = createSequence({
       start_datetime: '2017-01-01T08:00',
       end_datetime: '2017-01-01T09:00',
       recurrence_rule: {
@@ -160,7 +161,7 @@ describe('recurrenceIterator', () => {
         dtstart: '2017-01-01T08:00',
       },
       tzid: 'UTC',
-    } as Sequence;
+    });
     const ri = recurrenceIterator([seq], new Date('2017-01-01T00:00Z'));
     let next = ri.next();
     expect(next.value.start.toISOString()).toBe('2017-01-01T08:00:00.000Z');
@@ -173,7 +174,7 @@ describe('recurrenceIterator', () => {
     expect(next.value.sequence).toBe(seq);
   });
   it('should return multiple values for a recurring rule (with timezone)', () => {
-    const seq = {
+    const seq = createSequence({
       start_datetime: '2017-01-01T08:00',
       end_datetime: '2017-01-01T09:00',
       recurrence_rule: {
@@ -183,7 +184,7 @@ describe('recurrenceIterator', () => {
         dtstart: '2017-01-01T08:00',
       },
       tzid: 'America/St_Johns',
-    } as Sequence;
+    });
     const ri = recurrenceIterator([seq], new Date('2017-01-01T00:00Z'));
     let next = ri.next();
     expect(next.value.start.toString()).toBe(
@@ -202,7 +203,7 @@ describe('recurrenceIterator', () => {
     expect(next.value.sequence).toBe(seq);
   });
   it('should return multiple values for a recurring rule (with daylight savings)', () => {
-    const seq = {
+    const seq = createSequence({
       start_datetime: '2017-01-02T08:00',
       end_datetime: '2017-01-02T09:00',
       recurrence_rule: {
@@ -211,7 +212,7 @@ describe('recurrenceIterator', () => {
         dtstart: '2017-01-02T08:00',
       },
       tzid: 'Pacific/Easter',
-    } as Sequence;
+    });
     const ri = recurrenceIterator([seq], new Date('2017-08-07T00:00Z'));
     let next = ri.next();
     expect(next.value.start.toISOString()).toBe('2017-08-07T14:00:00.000Z');
@@ -219,20 +220,22 @@ describe('recurrenceIterator', () => {
     expect(next.value.start.toISOString()).toBe('2017-08-14T13:00:00.000Z');
   });
   it('should return multiple values for multiple recurring rules', () => {
-    const seq1 = {
+    const seq1 = createSequence({
       start_datetime: '2017-01-01T01:00Z',
       recurrence_rule: {
         freq: Frequency.WEEKLY,
         byday: [WeekDay.SU, WeekDay.TU, WeekDay.TH],
+        dtstart: '2017-01-01T01:00Z',
       },
-    } as Sequence;
-    const seq2 = {
+    });
+    const seq2 = createSequence({
       start_datetime: '2017-01-01T02:00Z',
       recurrence_rule: {
         freq: Frequency.WEEKLY,
         byday: [WeekDay.SA, WeekDay.SU],
+        dtstart: '2017-01-01T02:00Z',
       },
-    } as Sequence;
+    });
     const ri = recurrenceIterator([seq1, seq2], new Date('2017-01-01T00:00Z'));
     let next = ri.next();
     expect(next.value.start.toISOString()).toBe('2017-01-01T01:00:00.000Z');
@@ -251,26 +254,26 @@ describe('recurrenceIterator', () => {
     expect(next.value.sequence).toBe(seq2);
   });
   it('should use updated_at as a tiebreaker', () => {
-    const seq1 = {
+    const seq1 = createSequence({
       start_datetime: '2017-01-01T01:00Z',
       updated_at: '2017-01-01T00:00Z',
       recurrence_rule: {
         freq: Frequency.WEEKLY,
         byday: [WeekDay.SU, WeekDay.TU, WeekDay.TH],
       },
-    } as Sequence;
-    const seq2 = {
+    });
+    const seq2 = createSequence({
       start_datetime: '2017-01-01T01:00Z',
       updated_at: '2017-01-01T00:01Z',
       recurrence_rule: {
         freq: Frequency.WEEKLY,
         byday: [WeekDay.TH, WeekDay.SU],
       },
-    } as Sequence;
-    const seq3 = {
+    });
+    const seq3 = createSequence({
       start_datetime: '2017-01-01T01:00Z',
       updated_at: '2017-01-01T00:02Z',
-    } as Sequence;
+    });
     const ri = recurrenceIterator(
       [seq1, seq2, seq3],
       new Date('2017-01-01T00:00Z'),
@@ -295,22 +298,22 @@ describe('recurrenceIterator', () => {
     expect(next.value.sequence).toBe(seq1);
   });
   it('should calculate durations', () => {
-    const seq1 = {
+    const seq1 = createSequence({
       start_datetime: '2017-01-01T01:00Z',
       end_datetime: '2017-01-01T01:30Z',
-    } as Sequence;
-    const seq2 = {
+    });
+    const seq2 = createSequence({
       start_datetime: '2017-01-01T23:00Z',
       end_datetime: '2017-01-02T00:00Z',
-    } as Sequence;
-    const seq3 = {
+    });
+    const seq3 = createSequence({
       start_datetime: '2017-01-01T23:00Z',
       end_datetime: '2017-01-02T23:00Z',
       recurrence_rule: {
         freq: Frequency.WEEKLY,
         byday: [WeekDay.TH, WeekDay.SU],
       },
-    } as Sequence;
+    });
     let ri = recurrenceIterator([seq1], new Date('2017-01-01T00:00Z'));
     let next = ri.next();
     // 30 minutes
@@ -327,18 +330,18 @@ describe('recurrenceIterator', () => {
     expect(+next.value.end - +next.value.start).toBe(24 * 60 * 60 * 1000);
   });
   it('should handle sequences with different timezones', () => {
-    const seq1 = {
+    const seq1 = createSequence({
       start_datetime: '2017-01-01T01:00',
       end_datetime: '2017-01-01T02:00',
       updated_at: '2017-01-01T00:00Z',
       tzid: 'America/Los_Angeles',
-    } as Sequence;
-    const seq2 = {
+    });
+    const seq2 = createSequence({
       start_datetime: '2017-01-01T01:00',
       end_datetime: '2017-01-01T02:00',
       updated_at: '2017-01-01T00:00Z',
       tzid: 'UTC',
-    } as Sequence;
+    });
     const ri = recurrenceIterator([seq1, seq2], new Date('2017-01-01T00:00Z'));
     let next = ri.next();
     expect(next.value.start.toISOString()).toBe('2017-01-01T01:00:00.000Z');
@@ -348,12 +351,12 @@ describe('recurrenceIterator', () => {
     expect(next.value.sequence).toBe(seq1);
   });
   it("should use the start_datetime as a recurrence even if it does't match the recurrence", () => {
-    const seq = {
+    const seq = createSequence({
       start_datetime: '2017-01-01T01:00Z', // Sunday
       end_datetime: '2017-01-01T02:00',
       updated_at: '2017-01-01T00:00Z',
       recurrence_rule: { freq: Frequency.WEEKLY, byday: [WeekDay.MO] },
-    } as Sequence;
+    });
     const ri = recurrenceIterator([seq], new Date('2017-01-01T00:00Z'));
     let next = ri.next();
     // Sunday
@@ -366,7 +369,7 @@ describe('recurrenceIterator', () => {
     expect(next.value.start.toISOString()).toBe('2017-01-09T01:00:00.000Z');
   });
   it('should handle long recurrences', () => {
-    const seq1 = {
+    const seq1 = createSequence({
       start_datetime: '2017-01-01T14:00:00',
       end_datetime: '2025-01-01T14:15:00',
       updated_at: '2017-01-01T00:00:00',
@@ -385,8 +388,8 @@ describe('recurrenceIterator', () => {
           WeekDay.SA,
         ],
       },
-    } as Sequence;
-    const seq2 = {
+    });
+    const seq2 = createSequence({
       ...seq1,
       start_datetime: '2017-01-01T00:00:00',
       end_datetime: '2025-01-01T00:15:00',
@@ -406,7 +409,7 @@ describe('recurrenceIterator', () => {
           WeekDay.SA,
         ],
       },
-    } as Sequence;
+    });
     const ri = recurrenceIterator([seq1, seq2], new Date('2017-01-01T00:00Z'));
     let next = ri.next();
     expect(next.value.start.toISOString()).toBe('2017-01-01T05:00:00.000Z');
@@ -418,7 +421,7 @@ describe('recurrenceIterator', () => {
     expect(next.value.start.toISOString()).toBe('2017-01-02T19:00:00.000Z');
   });
   it('should return past recurrences if they are still "open"', () => {
-    const seq1 = ({
+    const seq1 = createSequence({
       start_datetime: '2017-01-01T00:00:00',
       end_datetime: '2017-01-07T00:00:00',
       updated_at: '2017-01-01T00:00:00',
@@ -429,8 +432,8 @@ describe('recurrenceIterator', () => {
         interval: 1,
         bymonthday: [1],
       },
-    } as unknown) as Sequence;
-    const seq2 = ({
+    });
+    const seq2 = createSequence({
       start_datetime: '2017-01-07T00:00:00',
       end_datetime: '2017-01-14T00:00:00',
       updated_at: '2017-01-01T00:00:01',
@@ -441,7 +444,7 @@ describe('recurrenceIterator', () => {
         interval: 1,
         bymonthday: [7],
       },
-    } as unknown) as Sequence;
+    });
     let ri = recurrenceIterator([seq1, seq2], new Date('2017-01-02T00:00Z'));
     let next = ri.next();
     // Expect the Jan. 1 recurrence to get returned, even though it's Jan. 2

@@ -1,15 +1,4 @@
-import Frequency from './Frequency';
-import WeekDay from './WeekDay';
-
-interface RecurrenceRule {
-  byday?: WeekDay[];
-  byhour?: number;
-  byminute?: number;
-  dtstart: string;
-  freq: Frequency;
-  interval: number;
-  tzid: string;
-}
+import RecurrenceRule from './RecurrenceRule';
 
 export interface Sequence {
   created_at: string;
