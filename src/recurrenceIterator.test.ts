@@ -1,6 +1,6 @@
 /* eslint-disable no-mixed-operators */
 import * as moment from 'moment-timezone/builds/moment-timezone-with-data-2012-2022';
-import { RRule } from 'rrule-alt';
+import { RRule } from 'rrule';
 import recurrenceIterator, {
   compareStart,
   stringToRRuleDate,
@@ -9,6 +9,28 @@ import recurrenceIterator, {
 } from './recurrenceIterator';
 import { Frequency, WeekDay, Sequence } from './types';
 import createSequence from './factories/createSequence';
+
+describe.only('DST', () => {
+  it('should work!', () => {
+    const seq = createSequence({
+      start_datetime: '2019-11-03 09:00:00',
+      end_datetime: '2019-11-03 16:00:00',
+      recurrence_rule: {
+        freq: Frequency.WEEKLY,
+        byday: [WeekDay.TH],
+        dtstart: '2018-06-03T09:00:00',
+      },
+      tzid: 'UTC',
+    });
+    const ri = recurrenceIterator([seq], new Date('2019-11-05T09:00Z'));
+    let next = ri.next();
+    if (!next.value) return;
+    expect(next.value.start.toISOString()).toBe('2019-11-07T09:00:00.000Z');
+    next = ri.next();
+    if (!next.value) return;
+    expect(next.value.start.toISOString()).toBe('2019-11-014T09:00:00.000Z');
+  });
+});
 
 describe('compareStart', () => {
   it('should compare start datetimes', () => {
@@ -105,6 +127,7 @@ describe('recurrenceIterator', () => {
     const seq1 = createSequence({ start_datetime: '2017-01-01T00:00Z' });
     const ri = recurrenceIterator([seq1]);
     let next = ri.next();
+    if (!next.value) return;
     expect(next.value.sequence).toBe(seq1);
     expect(next.value.start.toISOString()).toBe('2017-01-01T00:00:00.000Z');
     expect(next.done).toBe(false);
@@ -118,12 +141,15 @@ describe('recurrenceIterator', () => {
     const seq3 = createSequence({ start_datetime: '2017-01-02T01:00Z' });
     const ri = recurrenceIterator([seq1, seq3, seq2]);
     let next = ri.next();
+    if (!next.value) return;
     expect(next.value.sequence).toBe(seq1);
     expect(next.value.start.toISOString()).toBe('2017-01-01T00:00:00.000Z');
     next = ri.next();
+    if (!next.value) return;
     expect(next.value.sequence).toBe(seq2);
     expect(next.value.start.toISOString()).toBe('2017-01-02T00:00:00.000Z');
     next = ri.next();
+    if (!next.value) return;
     expect(next.value.sequence).toBe(seq3);
     expect(next.value.start.toISOString()).toBe('2017-01-02T01:00:00.000Z');
     next = ri.next();
@@ -164,12 +190,15 @@ describe('recurrenceIterator', () => {
     });
     const ri = recurrenceIterator([seq], new Date('2017-01-01T00:00Z'));
     let next = ri.next();
+    if (!next.value) return;
     expect(next.value.start.toISOString()).toBe('2017-01-01T08:00:00.000Z');
     expect(next.value.sequence).toBe(seq);
     next = ri.next();
+    if (!next.value) return;
     expect(next.value.start.toISOString()).toBe('2017-01-03T08:00:00.000Z');
     expect(next.value.sequence).toBe(seq);
     next = ri.next();
+    if (!next.value) return;
     expect(next.value.start.toISOString()).toBe('2017-01-08T08:00:00.000Z');
     expect(next.value.sequence).toBe(seq);
   });
@@ -187,19 +216,23 @@ describe('recurrenceIterator', () => {
     });
     const ri = recurrenceIterator([seq], new Date('2017-01-01T00:00Z'));
     let next = ri.next();
+    if (!next.value) return;
     expect(next.value.start.toString()).toBe(
       new Date(Date.UTC(2017, 0, 1, 11, 30)).toString(),
     );
     expect(next.value.sequence).toBe(seq);
     next = ri.next();
+    if (!next.value) return;
     expect(next.value.start.toString()).toBe(
       new Date(Date.UTC(2017, 0, 3, 11, 30)).toString(),
     );
     expect(next.value.sequence).toBe(seq);
     next = ri.next();
+    if (!next.value) return;
     expect(next.value.start.toString()).toBe(
       new Date(Date.UTC(2017, 0, 8, 11, 30)).toString(),
     );
+    if (!next.value) return;
     expect(next.value.sequence).toBe(seq);
   });
   it('should return multiple values for a recurring rule (with daylight savings)', () => {
@@ -215,8 +248,10 @@ describe('recurrenceIterator', () => {
     });
     const ri = recurrenceIterator([seq], new Date('2017-08-07T00:00Z'));
     let next = ri.next();
+    if (!next.value) return;
     expect(next.value.start.toISOString()).toBe('2017-08-07T14:00:00.000Z');
     next = ri.next();
+    if (!next.value) return;
     expect(next.value.start.toISOString()).toBe('2017-08-14T13:00:00.000Z');
   });
   it('should return multiple values for multiple recurring rules', () => {
@@ -238,18 +273,23 @@ describe('recurrenceIterator', () => {
     });
     const ri = recurrenceIterator([seq1, seq2], new Date('2017-01-01T00:00Z'));
     let next = ri.next();
+    if (!next.value) return;
     expect(next.value.start.toISOString()).toBe('2017-01-01T01:00:00.000Z');
     expect(next.value.sequence).toBe(seq1);
     next = ri.next();
+    if (!next.value) return;
     expect(next.value.start.toISOString()).toBe('2017-01-01T02:00:00.000Z');
     expect(next.value.sequence).toBe(seq2);
     next = ri.next();
+    if (!next.value) return;
     expect(next.value.start.toISOString()).toBe('2017-01-03T01:00:00.000Z');
     expect(next.value.sequence).toBe(seq1);
     next = ri.next();
+    if (!next.value) return;
     expect(next.value.start.toISOString()).toBe('2017-01-05T01:00:00.000Z');
     expect(next.value.sequence).toBe(seq1);
     next = ri.next();
+    if (!next.value) return;
     expect(next.value.start.toISOString()).toBe('2017-01-07T02:00:00.000Z');
     expect(next.value.sequence).toBe(seq2);
   });
@@ -279,21 +319,27 @@ describe('recurrenceIterator', () => {
       new Date('2017-01-01T00:00Z'),
     );
     let next = ri.next();
+    if (!next.value) return;
     expect(next.value.start.toISOString()).toBe('2017-01-01T01:00:00.000Z');
     expect(next.value.sequence).toBe(seq3);
     next = ri.next();
+    if (!next.value) return;
     expect(next.value.start.toISOString()).toBe('2017-01-01T01:00:00.000Z');
     expect(next.value.sequence).toBe(seq2);
     next = ri.next();
+    if (!next.value) return;
     expect(next.value.start.toISOString()).toBe('2017-01-01T01:00:00.000Z');
     expect(next.value.sequence).toBe(seq1);
     next = ri.next();
+    if (!next.value) return;
     expect(next.value.start.toISOString()).toBe('2017-01-03T01:00:00.000Z');
     expect(next.value.sequence).toBe(seq1);
     next = ri.next();
+    if (!next.value) return;
     expect(next.value.start.toISOString()).toBe('2017-01-05T01:00:00.000Z');
     expect(next.value.sequence).toBe(seq2);
     next = ri.next();
+    if (!next.value) return;
     expect(next.value.start.toISOString()).toBe('2017-01-05T01:00:00.000Z');
     expect(next.value.sequence).toBe(seq1);
   });
@@ -316,16 +362,19 @@ describe('recurrenceIterator', () => {
     });
     let ri = recurrenceIterator([seq1], new Date('2017-01-01T00:00Z'));
     let next = ri.next();
+    if (!next.value) return;
     // 30 minutes
     expect(+next.value.end - +next.value.start).toBe(30 * 60 * 1000);
 
     ri = recurrenceIterator([seq2], new Date('2017-01-01T00:00Z'));
     next = ri.next();
+    if (!next.value) return;
     // 1 hour
     expect(+next.value.end - +next.value.start).toBe(60 * 60 * 1000);
 
     ri = recurrenceIterator([seq3], new Date('2017-01-01T00:00Z'));
     next = ri.next();
+    if (!next.value) return;
     // 24 hours
     expect(+next.value.end - +next.value.start).toBe(24 * 60 * 60 * 1000);
   });
@@ -344,9 +393,11 @@ describe('recurrenceIterator', () => {
     });
     const ri = recurrenceIterator([seq1, seq2], new Date('2017-01-01T00:00Z'));
     let next = ri.next();
+    if (!next.value) return;
     expect(next.value.start.toISOString()).toBe('2017-01-01T01:00:00.000Z');
     expect(next.value.sequence).toBe(seq2);
     next = ri.next();
+    if (!next.value) return;
     expect(next.value.start.toISOString()).toBe('2017-01-01T09:00:00.000Z');
     expect(next.value.sequence).toBe(seq1);
   });
@@ -359,12 +410,15 @@ describe('recurrenceIterator', () => {
     });
     const ri = recurrenceIterator([seq], new Date('2017-01-01T00:00Z'));
     let next = ri.next();
+    if (!next.value) return;
     // Sunday
     expect(next.value.start.toISOString()).toBe('2017-01-01T01:00:00.000Z');
     next = ri.next();
+    if (!next.value) return;
     // Monday
     expect(next.value.start.toISOString()).toBe('2017-01-02T01:00:00.000Z');
     next = ri.next();
+    if (!next.value) return;
     // The following Monday
     expect(next.value.start.toISOString()).toBe('2017-01-09T01:00:00.000Z');
   });
@@ -412,12 +466,16 @@ describe('recurrenceIterator', () => {
     });
     const ri = recurrenceIterator([seq1, seq2], new Date('2017-01-01T00:00Z'));
     let next = ri.next();
+    if (!next.value) return;
     expect(next.value.start.toISOString()).toBe('2017-01-01T05:00:00.000Z');
     next = ri.next();
+    if (!next.value) return;
     expect(next.value.start.toISOString()).toBe('2017-01-01T19:00:00.000Z');
     next = ri.next();
+    if (!next.value) return;
     expect(next.value.start.toISOString()).toBe('2017-01-02T05:00:00.000Z');
     next = ri.next();
+    if (!next.value) return;
     expect(next.value.start.toISOString()).toBe('2017-01-02T19:00:00.000Z');
   });
   it('should return past recurrences if they are still "open"', () => {
@@ -447,26 +505,32 @@ describe('recurrenceIterator', () => {
     });
     let ri = recurrenceIterator([seq1, seq2], new Date('2017-01-02T00:00Z'));
     let next = ri.next();
+    if (!next.value) return;
     // Expect the Jan. 1 recurrence to get returned, even though it's Jan. 2
     expect(next.value.start.toISOString()).toBe('2017-01-01T00:00:00.000Z');
     next = ri.next();
+    if (!next.value) return;
     // Let's just make sure the rest of the sequence matches expectations
     expect(next.value.start.toISOString()).toBe('2017-01-07T00:00:00.000Z');
     next = ri.next();
+    if (!next.value) return;
     expect(next.value.start.toISOString()).toBe('2017-02-01T00:00:00.000Z');
     next = ri.next();
+    if (!next.value) return;
     expect(next.value.start.toISOString()).toBe('2017-02-07T00:00:00.000Z');
 
     // Make sure the recurrence start date is respected; even though the
     // recurrence makes sense in 2016, it shouldn't start until 2017.
     ri = recurrenceIterator([seq1, seq2], new Date('2016-01-02T00:00Z'));
     next = ri.next();
+    if (!next.value) return;
     expect(next.value.start.toISOString()).toBe('2017-01-01T00:00:00.000Z');
 
     // Make sure if we ask for the next recurrence when now === the previous
     // recurrence's end time, we return the next recurrence.
     ri = recurrenceIterator([seq1, seq2], new Date('2017-01-07T00:00Z'));
     next = ri.next();
+    if (!next.value) return;
     expect(next.value.start.toISOString()).toBe('2017-01-07T00:00:00.000Z');
   });
 });

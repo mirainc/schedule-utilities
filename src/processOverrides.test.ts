@@ -1,6 +1,6 @@
 import processOverrides from './processOverrides';
 import recurrenceIterator from './recurrenceIterator';
-import { Frequency, WeekDay } from './types';
+import { Frequency, WeekDay, Occurrence } from './types';
 import createOccurrence from './factories/createOccurrence';
 import createSequence from './factories/createSequence';
 
@@ -383,10 +383,12 @@ describe('processOverrides', () => {
       },
     ].map(createSequence);
     const ri = recurrenceIterator(sequences, new Date('2017-01-01T00:00Z'));
-    const occurrences = [];
+    const occurrences: Occurrence[] = [];
     const NUM_OCCURRENCES = 50;
     for (let i = 0; i < NUM_OCCURRENCES; i += 1) {
-      occurrences.push(ri.next().value);
+      let next = ri.next();
+      if (!next.value) return;
+      occurrences.push(next.value);
     }
     const split = processOverrides(occurrences);
     expect(split.length).toBe(NUM_OCCURRENCES + 1);
