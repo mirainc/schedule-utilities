@@ -26,7 +26,7 @@ const createSequence = (
     id: `sequence_${id++}`,
     name: 'sequence name',
     presentations: [],
-    tzid: moment().zoneName(),
+    tzid: moment.tz.guess(),
     updated_at: new Date().toISOString(),
     user_id: 'user_id',
     ...overrides,

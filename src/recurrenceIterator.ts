@@ -1,6 +1,6 @@
 // Takes in a collection of sequences.
 // Returns a series of sequences in the order in which they'll run.
-import { RRule } from 'rrule-alt';
+import { RRule } from 'rrule';
 import * as moment from 'moment-timezone/builds/moment-timezone-with-data-2012-2022';
 import Sequence from './types/Sequence';
 
@@ -66,8 +66,8 @@ export const compareEnd = compareDateField('end');
 // and translate them back to the browser timezone when done.
 // We remove trailing Zs here as the API will sometimes return datetimes
 // with the UTC marker (Z) even though these datetimes are timezoned.
-export const stringToRRuleDate = (dt: string) =>
-  moment(dt.replace(/Z/, '')).toDate();
+export const stringToRRuleDate = (dt: string) => moment(dt).toDate();
+// moment(dt.replace(/Z/, '')).toDate();
 
 // Start dates are passed in as local time, and we need to move them into
 // the RRule no-timezone bubble universe. We take the local time, translate
@@ -170,6 +170,7 @@ export default function* getRecurrenceIterator(
         freq: frequencyMap[freq],
         byweekday,
         dtstart,
+        tzid,
       };
       // Create the RRule
       let rrule: RRule;
