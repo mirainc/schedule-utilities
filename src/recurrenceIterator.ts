@@ -61,36 +61,14 @@ export const compareDateField = (field: 'start' | 'end') => (
 export const compareStart = compareDateField('start');
 export const compareEnd = compareDateField('end');
 
-// When dealing with RRules, create dates independent of their timezone.
-// We need to deal with recurrences like they're in their original timezones
-// and translate them back to the browser timezone when done.
-// We remove trailing Zs here as the API will sometimes return datetimes
-// with the UTC marker (Z) even though these datetimes are timezoned.
 export const stringToRRuleDate = (dt: string) => moment(dt).toDate();
-// moment(dt.replace(/Z/, '')).toDate();
-
-// Start dates are passed in as local time, and we need to move them into
-// the RRule no-timezone bubble universe. We take the local time, translate
-// into the sequence's timezone, export as string, and create a new local
-// date object based on that.
-// This is probably a bit hard to wrap your head around, but basically we're
-// looking for 8am PST to get translated into 11am EST, but we then sleaze
-// that into 11am PST to make the rrule logic work.
-export const realDateToRRuleDate = (date: Date, rruleTZ: string) =>
-  moment(
-    moment(date)
-      .tz(rruleTZ)
-      .format('YYYYMMDDTHHmmss.SSS'),
-  ).toDate();
-
-// Translate an RRuleDate from its weird timezone-free bubble universe
-// into a real date.
-export const rRuleDateToRealDate = (date: Date, tzid: string) => {
+export const realDateToRRuleDate = (date: Date) => date;
+export const rRuleDateToRealDate = (date: Date) => {
   if (!date) {
     return null;
   }
-  const dt = moment(date).format('YYYYMMDDTHHmmss.SSS');
-  return moment.tz(dt, tzid).toDate();
+
+  return date;
 };
 
 const getNonrecurrenceIterator = (sequence: Sequence, startDate: Date) => {
@@ -102,7 +80,7 @@ const getNonrecurrenceIterator = (sequence: Sequence, startDate: Date) => {
   }
   // Generate an iterator
   const rruleStart = stringToRRuleDate(sequence.start_datetime);
-  const start = rRuleDateToRealDate(rruleStart, tzid);
+  const start = rRuleDateToRealDate(rruleStart);
   return {
     rruleStart,
     start,
@@ -191,11 +169,11 @@ export default function* getRecurrenceIterator(
       const rruleStart = nri
         ? nri.rruleStart
         : currentOrNextRRuleStart({
-            start: realDateToRRuleDate(startDate, tzid),
+            start: realDateToRRuleDate(startDate),
             duration,
             rrule,
           });
-      const start = nri ? nri.start : rRuleDateToRealDate(rruleStart, tzid);
+      const start = nri ? nri.start : rRuleDateToRealDate(rruleStart);
       return {
         rruleStart,
         start,
@@ -216,7 +194,7 @@ export default function* getRecurrenceIterator(
   while (rules[0].start) {
     const { sequence, start, tzid, duration } = rules[0];
     rules[0].rruleStart = rules[0].next();
-    rules[0].start = rRuleDateToRealDate(rules[0].rruleStart, tzid);
+    rules[0].start = rRuleDateToRealDate(rules[0].rruleStart);
     rules.sort(compareStart);
     yield {
       sequence,

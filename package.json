@@ -22,10 +22,6 @@
   "bugs": {
     "url": "https://github.com/mirainc/schedule-utilities/issues"
   },
-  "prettier": {
-    "trailingComma": "all",
-    "singleQuote": true
-  },
   "homepage": "https://github.com/mirainc/schedule-utilities#readme",
   "devDependencies": {
     "@types/jest": "^22.2.3",
