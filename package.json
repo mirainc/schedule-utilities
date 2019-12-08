@@ -22,22 +22,18 @@
   "bugs": {
     "url": "https://github.com/mirainc/schedule-utilities/issues"
   },
-  "prettier": {
-    "trailingComma": "all",
-    "singleQuote": true
-  },
   "homepage": "https://github.com/mirainc/schedule-utilities#readme",
   "devDependencies": {
     "@types/jest": "^22.2.3",
     "@types/moment-timezone": "^0.5.12",
     "jest": "^22.0.6",
-    "rrule": "^2.6.0",
+    "rrule": "^2.6.2",
     "typescript": "^3.3.4000"
   },
   "dependencies": {
     "moment": "^2.20.1",
     "moment-timezone": "^0.5.14",
-    "rrule-alt": "^2.2.7"
+    "rrule-alt": "^2.2.8"
   },
   "jest": {
     "testEnvironment": "node"
